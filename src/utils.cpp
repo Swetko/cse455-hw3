@@ -86,6 +86,45 @@ inline float dot_product(const float* a, const float* b, int n)
   return sum;
   }
 
+
+Image Image::abs(void) const 
+  {
+  Image ret=*this;
+  for(int q2=0;q2<h;q2++)for(int q1=0;q1<w;q1++)
+    for(int q3=0;q3<c;q3++)
+      {
+      float a=pixel(q1,q2,q3);
+      ret(q1,q2,q3)=fabsf(a);
+      }
+  return ret;
+  }
+
+
+Image vel2rgb(const Image& v, float thres)
+  {
+  TIME(1);
+  assert(v.c==2 && "velocity must contain 2 channels");
+  Image ret(v.w,v.h,3);
+  
+  for(int q2=0;q2<v.h;q2++)for(int q1=0;q1<v.w;q1++)
+    {
+    float dx=v(q1,q2,0);
+    float dy=v(q1,q2,1);
+    //printf("%f %f %f\n",dx,dy,sqrtf(dx*dx+dy*dy));
+    float mag=min(sqrtf(dx*dx+dy*dy)/thres,1.f);
+    float hue=(atan2f(dy,dx)+M_PI)/2/M_PI;
+    if(hue<0)hue=0;
+    if(hue>1)hue=1;
+    Color c=Color::HSV(hue,mag,mag);
+    ret(q1,q2,0)=c.c[0];
+    ret(q1,q2,1)=c.c[1];
+    ret(q1,q2,2)=c.c[2];
+    }
+  return ret;
+  }
+
+Image Image::rgb_to_grayscale(void) const { return ::rgb_to_grayscale(*this); }
+
 Image fast_smooth_image(const Image& im, float sigma)
   {
   //TIME(1);
