@@ -29,15 +29,16 @@ Fill in `velocity_image` to use the equation to calculate the velocity of each p
 
 Try calculating the optical flow between two dog images
 
-    Image a = load_image("data/dog_a.jpg");
-    Image b = load_image("data/dog_b.jpg");
-    Image flow = optical_flow_images(b, a)
-    draw_flow(a, flow, 8)
-    save_image(a, "lines")
+    Image a = load_image("data/dog_a.jpg").rgb_to_grayscale();
+    Image b = load_image("data/dog_b.jpg").rgb_to_grayscale();
+    Image flow = optical_flow_images(b, a,5,5);
+    Image colorflow=vel2rgb(flow,10);
+    save_image(colorflow, "output/dog_vel");
+  
 
 It may look something like:
 
-![](figs/lines.jpg)
+![](figs/dog_vel.jpg)
 
 ## 2. Implement Iterative refinement and Pyramidal refinement ##
 
