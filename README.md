@@ -27,10 +27,10 @@ Compute the two eigenvalues per pixel and return an image with two channels
 
 Fill in `velocity_image` to use the equation to calculate the velocity of each pixel in the x and y direction. For each pixel, produce a matrix `S'S` and a vector `S'T` using the classes `class Matrix2x2` and `class Vector2`. Invert the matrix, and use it to calculate the velocity.
 
-Try calculating the optical flow between two images
+Try calculating the optical flow between two dog images
 
-    Image a = load_image("data/a.jpg");
-    Image b = load_image("data/b.jpg");
+    Image a = load_image("data/dog_a.jpg");
+    Image b = load_image("data/dog_b.jpg");
     Image flow = optical_flow_images(b, a)
     draw_flow(a, flow, 8)
     save_image(a, "lines")
