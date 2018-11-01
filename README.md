@@ -48,6 +48,8 @@ First is `velocity_resize`. You computed the velocity image at a lower resolutio
 
 After you have updated flow, you can run iterative LK. That means running one iteration of LK, obtainig a flow `v` from image `t0` to `t1`, and warping `t0` accoring to the flow `v`. That means sending each pixel from `t0(x,y)` to the location `(x+vx,y+dy)=(x+v(x,y,0),y+(v,x,y,1))`. Think what is necessary to achieve that. What do you do if a pixel does not move exactly to a new integer coordinates pixel? What do you if no pixel goes to a given new pixel `(x,y)`? You can answer and implement these questions using techniques we studied in class.
 
+For your convenience we have proividede the function `compute_iterative_pyramid_LK` that drives the algorithm.
+
 Now running:
 
     Image a = load_image("data/dog_a.jpg");
@@ -76,9 +78,21 @@ Should give us:
     
 ![](figs/dog_vel_improved.jpg)
 
-## 3. Optical flow demo using OpenCV or Pangolin ##
+## 3. Testing and optical flow demo using OpenCV or Pangolin ##
 
-Using OpenCV and Pangolin we can get images from the webcam and display the results in real-time. 
+You can run `./test3` which does some basic tests and outputs `dog_vel.jpg` and `dog_vel_improved.jpg`
+
+Using OpenCV and Pangolin we can get images from the webcam and display the results in real-time. You need to install OpenCV. On CentOS/Fedora  run `sudo yum install opencv-devel.x86_64`. On Debian/Ubuntu `sudo apt-get install libopencv-dev`. 
+
+Then you can run `./test3 live` which will open your webcam and display 4 images: Current frame, velocity image, warped previous frame according to velocity and last is the error between warped image and current frame.
+
+If you want to be able to change parameters of your algorithm, you have to use Pangolin. Just like before install it and then compile your code (Note: Pangolin requires OpenCV to display webcam stream). 
+
+You can run `./optical-flow` to try running webcam.
+You can run `./optical-flow video.pango` to try running prerecorded stream.
+You can run `./optical-flow a.jog b.jpg` to try running optical flow only between these two images.
+
+YOu can download a sample `video.pango` from this [link](https://drive.google.com/open?id=1xKisY2312YoGs1FOQfk4XGdnJ0iSuiq8)
 
 ## 4. Turn it in ##
 
