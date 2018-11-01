@@ -39,10 +39,18 @@ It may look something like:
 
 ![](figs/lines.jpg)
 
-## 2. Optical flow demo using OpenCV or Pangolin ##
+## 2. Implement Iterative refinement and Pyramidal refinement ##
+
+For your convenience computing the sequence of pyramidal images has been implemented. You need to implement two methods. 
+
+First is `velocity_resize`. You computed the velocity image at a lower resolution. Now you move down the pyramid and need to initialize the flow with the flow from the image below. The function takes the old flow and the new sizes which are bigger and you need to return the updated flow. Think about what rescaling/resizing the flow means. Is it just image resizing?
+
+After you have updated flow, you can run iterative LK. That means running one iteration of LK, obtainig a flow `v` from image `t0` to `t1`, and warping `t0` accoring to the flow `v`. That means sending each pixel from `t0(x,y)` to the location `(x+vx,y+dy)=(x+v(x,y,0),y+(v,x,y,1))`. Think what is necessary to achieve that. What do you do if a pixel does not move exactly to a new integer coordinates pixel? What do you if no pixel goes to a given new pixel `(x,y)`? You can answer and implement these questions using techniques we studied in class.
+
+## 3. Optical flow demo using OpenCV or Pangolin ##
 
 Using OpenCV and Pangolin we can get images from the webcam and display the results in real-time. 
 
-## 3. Turn it in ##
+## 34. Turn it in ##
 
 Turn in your `flow_image.cpp` on canvas under Assignment 3.
