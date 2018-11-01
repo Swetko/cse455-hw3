@@ -89,7 +89,9 @@ Then you can run `./test3 live` which will open your webcam and display 4 images
 If you want to be able to change parameters of your algorithm, you have to use Pangolin. Just like before install it and then compile your code (Note: Pangolin requires OpenCV to display webcam stream). 
 
 You can run `./optical-flow` to try running webcam.
+
 You can run `./optical-flow video.pango` to try running prerecorded stream.
+
 You can run `./optical-flow a.jog b.jpg` to try running optical flow only between these two images.
 
 You can download a sample `video.pango` from this [link](https://drive.google.com/open?id=1xKisY2312YoGs1FOQfk4XGdnJ0iSuiq8)
