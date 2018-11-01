@@ -8,124 +8,53 @@ using namespace std;
 
 
 
-void test_structure()
+void test_functions()
   {
-  Image im = load_image("data/dogbw.png");
-  Image s = structure_matrix(im, 2);
-  s.feature_normalize_total();
-  save_png(s, "output/structure");
-  Image gt = load_image("data/structure.png");
+  Image a = load_image("data/dog_a.jpg").rgb_to_grayscale();
+  Image b = load_image("data/dog_b.jpg").rgb_to_grayscale();
   
-  TEST(same_image(s, gt));
-  }
-
-void test_cornerness()
-  {
-  Image im = load_image("data/dogbw.png");
-  Image s = structure_matrix(im, 2);
-  Image c = cornerness_response(s,0);
-  c.feature_normalize_total();
-  save_png(c, "output/response");
-  Image gt = load_image("data/response.png");
-  TEST(same_image(c, gt));
-  }
-
-
-
-
-struct LKIterPyramid
-  {
-  // INPUT
-  vector<Image> pyramid1;
-  vector<Image> pyramid0;
-  Image t0;
-  Image t1;
+  Image S = time_structure_matrix(b,a,10);
+  Image ev = eigenvalue_matrix(S);
+  Image vel = velocity_image(S,ev);
+  Image colorflow = vel2rgb(vel,20);
+  Image warped = warp_flow(a,vel);
   
-  // OUTPUT
-  Image v;  // resulting velocity
-  Image colorflow; // colorized velocity
-  Image error; // difference between warp(t0,v) and t1
-  Image ev3; // three channel eigenvalue image for displaying
-  Image warped;// warped t0 with flow v
-  Image all; // ciombined 4 images for Opencv display
+  Image S1(a.w,a.h,3);
+  S1.set_channel(0,S.get_channel(0));
+  S1.set_channel(1,S.get_channel(1));
+  S1.set_channel(2,S.get_channel(2));
+  Image S2(a.w,a.h,3);
+  S2.set_channel(0,S.get_channel(3));
+  S2.set_channel(1,S.get_channel(4));
+  Image ev3(a.w,a.h,3);
+  ev3.set_channel(0,ev.get_channel(0));
+  ev3.set_channel(1,ev.get_channel(1));
   
-  // OPTIONS
-  float subsample_input=2;    // how much to reduce input image size
-  float smooth_structure=1;   // how much to smooth structure matrix
-  float smooth_vel=1;         // how much to smooth resulting velocity
-  int lk_iterations=2;        // LK iterations to run (0 -  no flow, 1 - standard version)
-  int pyramid_levels=6;       // pyramid levels (1 - standard algo)
-  float pyramid_factor=2;     // ratio of sizes between successive pyramid levels
-  float clamp_vel=10;         // how much to clamp velocity
-  float vel_color_scale=4;    // saturation of vel image
-  
-  bool compute_all=false; // compute total combined image for opencv
-  bool compute_colored_ev=true; // compute colored eigenvalue image
-  };
-
-
-void compute_iterative_pyramid_LK(LKIterPyramid& lk)
-  {
-  TIME(1); // time algo
-  Image S;
-  Image ev;
-  Image v2;
-  
-  int h=lk.pyramid0[0].h;
-  int w=lk.pyramid0[0].w;
-  
-  for(int q2=lk.pyramid_levels-1;q2>=0;q2--)
-    {
-    
-    int pw=lk.pyramid1[q2].w;
-    int ph=lk.pyramid1[q2].h;
-    
-    
-    if(q2==lk.pyramid_levels-1)
-      {
-      lk.v=Image(pw,ph,2);
-      lk.warped=lk.pyramid0[q2];
-      }
-    else
-      {
-      lk.v=velocity_resize(lk.v,pw,ph);
-      lk.warped=warp_flow(lk.pyramid0[q2],lk.v);
-      }
-    
-    for(int q1=0;q1<lk.lk_iterations;q1++)
-      {
-      S = time_structure_matrix(lk.pyramid1[q2], lk.warped, lk.smooth_structure);
-      ev = eigenvalue_matrix(S);
-      v2 = velocity_image(S, ev);
-      
-      v2=fast_smooth_image(v2,lk.smooth_vel);
-      lk.v=lk.v+v2;
-      
-      constrain_image(lk.v,lk.clamp_vel);
-      lk.warped=warp_flow(lk.pyramid0[q2],lk.v);
-      }
-    
-    }
+  ev3.feature_normalize_total();
+  S1.feature_normalize_total();
+  S2.feature_normalize_total();
   
   
+  save_png(S1,"output/StS");
+  save_png(S2,"output/StT");
+  save_png(ev3,"output/ev");
+  save_png(colorflow,"output/colorflow");
+  save_png(warped,"output/warped");
   
-  lk.colorflow=vel2rgb(lk.v,lk.vel_color_scale);
-  lk.error=(lk.warped-lk.pyramid1[0]).abs();
+  Image StS=load_image("data/StS.png");
+  Image StT=load_image("data/StT.png");
+  Image EV3=load_image("data/ev.png");
+  Image CF=load_image("data/colorflow.png");
+  Image WARP=load_image("data/warped.png");
   
-  if(lk.compute_all)
-    {
-    lk.all=Image(w*2,h*2,3);
-    for(int c=0;c<3;c++)for(int q2=0;q2<h;q2++)for(int q1=0;q1<w;q1++)lk.all(q1+0,q2+0,c)=lk.t1(q1,q2,c);
-    for(int c=0;c<3;c++)for(int q2=0;q2<h;q2++)for(int q1=0;q1<w;q1++)lk.all(q1+w,q2+0,c)=lk.colorflow(q1,q2,c);
-    for(int c=0;c<3;c++)for(int q2=0;q2<h;q2++)for(int q1=0;q1<w;q1++)lk.all(q1+0,q2+h,c)=lk.warped(q1,q2);
-    for(int c=0;c<3;c++)for(int q2=0;q2<h;q2++)for(int q1=0;q1<w;q1++)lk.all(q1+w,q2+h,c)=lk.error(q1,q2);
-    }
+  TEST(same_image(S1,StS));
+  TEST(same_image(S2,StT));
+  TEST(same_image(ev3,EV3));
+  TEST(same_image(colorflow,CF));
+  TEST(same_image(warped,WARP));
+  printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
   
-  if(lk.compute_colored_ev)
-    {
-    lk.ev3=Image(ev.w,ev.h,3);
-    memcpy(lk.ev3.data,ev.data,ev.size()*sizeof(float));
-    }
+  
   
   }
 
@@ -167,14 +96,9 @@ void optical_flow_webcam(void)
   
   while(1)
     {
-    
-    
-    
     cur=1-cur;
     
     imo[cur]=get_image_from_stream(cap);
-    
-    
     
     im[cur]=bilinear_resize(fast_smooth_image(imo[cur],lk.subsample_input/2),w,h);
     pyramid[cur]=make_image_pyramid(im[cur].rgb_to_grayscale(),lk.pyramid_factor,lk.pyramid_levels);
@@ -211,20 +135,17 @@ void optical_flow_webcam(void)
 #endif
   }
 
-
-void run_tests()
-  {
-  //test_structure();
-  //test_cornerness();
-  
-  //printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
-  }
-
 int main(int argc, char **argv)
   {
-  //run_tests();
+  if(argc==2 && string(argv[1])=="live")
+    {
+    optical_flow_webcam();
+    return 0;
+    }
   
-  //optical_flow_webcam();
+  test_functions();
+  
+  
   
   Image a = load_image("data/dog_a.jpg");
   Image b = load_image("data/dog_b.jpg");

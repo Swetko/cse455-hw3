@@ -124,17 +124,21 @@ int main(int argc, char** argv)
   {
   printf("USAGE: ./optical-flow test.pango\n/optical-flow (no args for live)\n");
   
-  bool live=true;
+  int live=1;
   
   
     
-  if(argc>1)
+  if(argc==2)
     {
     OpenInput(argv[1]);
-    live=false;
+    live=0;
+    }
+  else if(argc==3)
+    {
+    live=-1;
     }
   
-  if(!live)assert(video.Streams().size()==1 && "Can only work with single stream videos\n");
+  if(live==0)assert(video.Streams().size()==1 && "Can only work with single stream videos\n");
   
   // Create OpenGL window in single line
   pangolin::CreateWindowAndBind("Main",1280,720);
@@ -156,7 +160,6 @@ int main(int argc, char** argv)
   if(video_playback && TotalFrames() < std::numeric_limits<int>::max())
     {
     // frame_slider should be added first so that it can be rendered correctly.
-    live=false;
     pangolin::DisplayBase().AddDisplay(frame_slider);
     frame_slider.SetBounds(0.0, pangolin::Attach::Pix(slider_size), 0.0, 1.0);
     }
@@ -205,7 +208,7 @@ int main(int argc, char** argv)
   auto get_frame=[&](int fn)
     {
     
-    if(!live)
+    if(live==0)
       {
       std::vector<pangolin::Image<unsigned char> > images;
       std::unique_ptr<unsigned char[]> buffer(new unsigned char[video.SizeBytes()+1]);
@@ -213,13 +216,19 @@ int main(int argc, char** argv)
       video.Grab(&buffer[0], images, true, false);
       return fromPangolin(images[0],video.Streams()[0].PixFormat());
       }
+    else if(live==1)
+      {
+      #ifdef OPENCV
+      static cv::VideoCapture cap(0); // open the default camera
+      assert(cap.isOpened()   &&  "Could not open camera\n"); // check if we succeeded
+      return get_image_from_stream(cap);
+      #else
+      return Image(1,1,1);
+      #endif
+      }
     else
       {
-      // open the default camera
-      static cv::VideoCapture cap(0);
-      // check if we succeeded
-      assert(cap.isOpened()   &&  "Could not open camera\n");
-      return get_image_from_stream(cap);
+      return Image(1,1,1);
       }
     };
   
@@ -227,8 +236,10 @@ int main(int argc, char** argv)
   
   Image t0,t1,v,colorflow,g0,g1,warpg0,error,t1orig,t0orig;
   
-  
-  if(!live)video.Start();
+  if(live==-1)t0=load_image(argv[1]);
+  if(live==-1)t1=load_image(argv[2]);
+    
+  if(live==0)video.Start();
   RegisterDefaultKeyShortcutsAndPangoVariables();
   
   
@@ -257,7 +268,7 @@ int main(int argc, char** argv)
     redo|=pyramid_factor.GuiChanged();
     redo|=pyramid_levels.GuiChanged();
     
-    if(live && play)
+    if(live==1 && play)
       {
       swap(t0,t1);
       t1=get_frame(0);
@@ -265,14 +276,14 @@ int main(int argc, char** argv)
       else redo=true;
       }
     
-    if(live)if(t0.size()==0 || t1.size()==0)redo=false;
+    if(live==1)if(t0.size()==0 || t1.size()==0)redo=false;
     
     //printf("%zu %zu %d %d\n",camimages0.size(),camimages1.size(),live,play);
     if(redo)
       {
       TIME(1);
       
-      if(!live)
+      if(live==0)
         {
         t0=get_frame(frame-direction);
         t1=get_frame(frame);
@@ -340,14 +351,6 @@ int main(int argc, char** argv)
       Image ev3(ev.w,ev.h,3);
       memcpy(ev3.data,ev.data,ev.size()*sizeof(float));
       
-      //{
-      //TIME(1);
-      //colorflow=bilinear_resize(colorflow,w,h);
-      //warpg0=bilinear_resize(warpg0,w,h);
-      //error=bilinear_resize(error,w,h);
-      //v=velocity_resize(v,w,h);
-      //}
-      
       
       iv[0].SetImage(toPangolin(t0orig));
       iv[1].SetImage(toPangolin(t1orig));
@@ -394,8 +397,8 @@ int main(int argc, char** argv)
     if(vo)pangolin::SaveFramebuffer(*vo,pangolin::DisplayBase().v); 
     
     
-    if(!live && play)frame=frame+direction;
-    if(!live && frame>frame.Meta().range[1] || frame<frame.Meta().range[0])
+    if(live==0 && play)frame=frame+direction;
+    if(live==0 && frame>frame.Meta().range[1] || frame<frame.Meta().range[0])
       {
       if(frame>frame.Meta().range[1])frame=frame.Meta().range[1];
       if(frame<frame.Meta().range[0])frame=frame.Meta().range[0];

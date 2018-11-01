@@ -139,3 +139,17 @@ Image fast_smooth_image(const Image& im, float sigma)
   }
 
 
+void Image::set_channel(int ch, const Image& im)
+  {
+  assert(im.c==1 && ch<c && ch>=0);
+  assert(im.w==w && im.h==h);
+  memcpy(&pixel(0,0,ch),im.data,sizeof(float)*im.size());
+  }
+
+Image Image::get_channel(int ch) const 
+  {
+  assert(ch<c && ch>=0);
+  Image im(w,h,1);
+  memcpy(im.data,&pixel(0,0,ch),sizeof(float)*im.size());
+  return im;
+  }
