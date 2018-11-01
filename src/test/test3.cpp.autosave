@@ -1,0 +1,156 @@
+#include "../image.h"
+#include "../utils.h"
+#include "../matrix.h"
+
+#include <string>
+
+using namespace std;
+
+
+
+void test_structure()
+  {
+  Image im = load_image("data/dogbw.png");
+  Image s = structure_matrix(im, 2);
+  s.feature_normalize_total();
+  save_png(s, "output/structure");
+  Image gt = load_image("data/structure.png");
+  
+  TEST(same_image(s, gt));
+  }
+
+void test_cornerness()
+  {
+  Image im = load_image("data/dogbw.png");
+  Image s = structure_matrix(im, 2);
+  Image c = cornerness_response(s,0);
+  c.feature_normalize_total();
+  save_png(c, "output/response");
+  Image gt = load_image("data/response.png");
+  TEST(same_image(c, gt));
+  }
+
+
+
+
+
+
+
+
+// Run optical flow demo on webcam
+void optical_flow_webcam(void)
+  {
+  LKIterPyramid lk;
+  lk.compute_all=true;
+  lk.compute_colored_ev=false;
+  
+  
+#ifdef OPENCV
+  cv::VideoCapture cap(0);
+  assert(cap.isOpened() && "cannot open camera");
+  Image imo[2]; // original full size image
+  Image im[2]; // resized image
+  vector < Image > pyramid[2]; // pyramids
+  
+  int cur=1; // current latest image (1-cur is the previous image)
+  
+  imo[cur]=get_image_from_stream(cap);
+  
+  int w=imo[cur].w/lk.subsample_input;
+  int h=imo[cur].h/lk.subsample_input;
+  
+  im[cur]=bilinear_resize(fast_smooth_image(imo[cur],lk.subsample_input/2),w,h);
+  pyramid[cur]=make_image_pyramid(im[cur].rgb_to_grayscale(),lk.pyramid_factor,lk.pyramid_levels);
+  
+  
+  
+  
+  //Image all(w*2,h*2,3);
+  //Image warped,v;
+  
+  while(1)
+    {
+    
+    
+    
+    cur=1-cur;
+    
+    imo[cur]=get_image_from_stream(cap);
+    
+    
+    
+    im[cur]=bilinear_resize(fast_smooth_image(imo[cur],lk.subsample_input/2),w,h);
+    pyramid[cur]=make_image_pyramid(im[cur].rgb_to_grayscale(),lk.pyramid_factor,lk.pyramid_levels);
+    
+    {
+    lk.t1=im[cur];               // init
+    lk.t0=im[1-cur];             // init
+    lk.pyramid1=pyramid[cur];    // init
+    lk.pyramid0=pyramid[1-cur];  // init
+    }
+    
+    compute_iterative_pyramid_LK(lk);
+    
+    cv::imshow("Optical-Flow",Image2Mat(lk.all));
+    if( cv::waitKey(1) == 27 ) break; // stop capturing by pressing ESC 
+    
+    
+    
+    //Image copy=im;
+    //Image v = optical_flow_images(im_c.rgb_to_grayscale(), prev_c.rgb_to_grayscale(), 2,2);
+    ////draw_flow(copy, v, smooth*div);
+    ////save_image(copy,"copy");
+    //int key = show_image(copy, "flow", 5);
+    //prev=move(im);
+    //prev_c=move(im_c);
+    //
+    //if(key != -1){key = key % 256;printf("%d\n", key);if (key == 27) break;}
+    //
+    //im = get_image_from_stream(cap);
+    //im_c = nn_resize(im, im.w/div, im.h/div);
+    }
+#else
+    fprintf(stderr, "Must compile with OpenCV\n");
+#endif
+  }
+
+
+void run_tests()
+  {
+  //test_structure();
+  //test_cornerness();
+  
+  //printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
+  }
+
+int main(int argc, char **argv)
+  {
+  //run_tests();
+  
+  //optical_flow_webcam();
+  
+  Image a = load_image("data/dog_a.jpg");
+  Image b = load_image("data/dog_b.jpg");
+  Image ag = a.rgb_to_grayscale();
+  Image bg = b.rgb_to_grayscale();
+  Image flow = optical_flow_images(bg, ag,5,5);
+  Image colorflow=vel2rgb(flow,10);
+  save_image(colorflow, "output/dog_vel");
+  
+  LKIterPyramid lk;
+  lk.pyramid_levels=8;
+  lk.vel_color_scale=20;
+  lk.clamp_vel=50;
+  
+  lk.t1=b;
+  lk.t0=a;
+  lk.pyramid0=make_image_pyramid(ag,lk.pyramid_factor,lk.pyramid_levels);
+  lk.pyramid1=make_image_pyramid(bg,lk.pyramid_factor,lk.pyramid_levels);
+  
+  compute_iterative_pyramid_LK(lk);
+  
+  save_image(lk.colorflow, "output/dog_vel_improved");
+  
+  
+  return 0;
+  }
