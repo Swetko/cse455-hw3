@@ -92,7 +92,7 @@ You can run `./optical-flow` to try running webcam.
 You can run `./optical-flow video.pango` to try running prerecorded stream.
 You can run `./optical-flow a.jog b.jpg` to try running optical flow only between these two images.
 
-YOu can download a sample `video.pango` from this [link](https://en.wikipedia.org/wiki/Lucas%E2%80%93Kanade_method)
+YOu can download a sample `video.pango` from this [link](https://drive.google.com/open?id=1xKisY2312YoGs1FOQfk4XGdnJ0iSuiq8)
 
 ## 4. Turn it in ##
 
