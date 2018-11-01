@@ -48,10 +48,38 @@ First is `velocity_resize`. You computed the velocity image at a lower resolutio
 
 After you have updated flow, you can run iterative LK. That means running one iteration of LK, obtainig a flow `v` from image `t0` to `t1`, and warping `t0` accoring to the flow `v`. That means sending each pixel from `t0(x,y)` to the location `(x+vx,y+dy)=(x+v(x,y,0),y+(v,x,y,1))`. Think what is necessary to achieve that. What do you do if a pixel does not move exactly to a new integer coordinates pixel? What do you if no pixel goes to a given new pixel `(x,y)`? You can answer and implement these questions using techniques we studied in class.
 
+Now running:
+
+    Image a = load_image("data/dog_a.jpg");
+    Image b = load_image("data/dog_b.jpg");
+    Image ag = a.rgb_to_grayscale();
+    Image bg = b.rgb_to_grayscale();
+    Image flow = optical_flow_images(bg, ag,5,5);
+    Image colorflow=vel2rgb(flow,10);
+    save_image(colorflow, "output/dog_vel");
+    
+    LKIterPyramid lk;
+    lk.pyramid_levels=8;
+    lk.vel_color_scale=20;
+    lk.clamp_vel=50;
+    
+    lk.t1=b;
+    lk.t0=a;
+    lk.pyramid0=make_image_pyramid(ag,lk.pyramid_factor,lk.pyramid_levels);
+    lk.pyramid1=make_image_pyramid(bg,lk.pyramid_factor,lk.pyramid_levels);
+    
+    compute_iterative_pyramid_LK(lk);
+    
+    save_image(lk.colorflow, "output/dog_vel_improved");
+    
+Should give us:
+    
+![](figs/dog_vel_improved.jpg)
+
 ## 3. Optical flow demo using OpenCV or Pangolin ##
 
 Using OpenCV and Pangolin we can get images from the webcam and display the results in real-time. 
 
-## 34. Turn it in ##
+## 4. Turn it in ##
 
 Turn in your `flow_image.cpp` on canvas under Assignment 3.
