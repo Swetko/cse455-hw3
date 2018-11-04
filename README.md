@@ -1,10 +1,11 @@
 # CSE 455 Homework 3 #
+#### UPDATED: Sunday,  Nov4 9am: Updated this Readme and flow_image.cpp to clarify few issues ####
 
 Welcome friends,
 
 It's time for optical flow!
 
-To start out this homework, copy over your `process_image.cpp`, `filter_image.cpp`, `resize_image.cpp`, `harris_image.cpp`, and`panorama_image.cpp` files from hw2 to the `src` directory in this homework. We will be continuing to build out your image library.
+To start out this homework, copy over your `process_image.cpp`, `filter_image.cpp`, `resize_image.cpp`, `harris_image.cpp`, and`panorama_image.cpp` files from hw2 to the `src` directory in this homework. We will be continuing to build out your image library. If you want to test your previous homeworks just copy the necessary data from the previous homework folder.
 
 ## 1. Lucas-Kanade optical flow ##
 
