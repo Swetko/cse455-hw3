@@ -32,7 +32,7 @@ Image time_structure_matrix(const Image& im, const Image& prev, float s)
 // returns: structure matrix. 0-th channel biggest eigenvalue, next smallest
 Image eigenvalue_matrix(const Image& ts)
   {
-  //TIME(1);
+  
   Image im(ts.w,ts.h,2);
   // TODO: fill in eigenvalues;
   
@@ -46,7 +46,7 @@ vector<Image> make_image_pyramid(const Image& a, float factor, int levels)
   {
   assert(a.c==1 && "Only for grayscale");
   
-  //TIME(1);
+  
   vector<Image> imgs(levels);
   imgs[0]=a;
   
@@ -70,7 +70,7 @@ vector<Image> make_image_pyramid(const Image& a, float factor, int levels)
 // const Image& ev: eigenvalue image
 Image velocity_image(const Image& S,const Image& ev)
   {
-  TIME(1);
+  
   Image v(S.w, S.h, 2);
   
   // TODO: compute velocity for each pixel using (S'S)(S'T) formula 
@@ -87,7 +87,7 @@ Image velocity_image(const Image& S,const Image& ev)
 // float v: each pixel will be in range [-v, v]
 void constrain_image(const Image& im, float v)
   {
-  //TIME(1);
+  
   for(int i = 0; i < im.w*im.h*im.c; ++i)
     {
     if (im.data[i] < -v) im.data[i] = -v;
@@ -98,7 +98,7 @@ void constrain_image(const Image& im, float v)
 
 Image warp_flow(const Image& im, const Image& v)
   {
-  TIME(1);
+  
   assert(im.c==1 && v.c==2 && "Only for grayscale and vel image needs 2 channels");
   assert(im.w==v.w && im.h==v.h && "Image and velocity need to be same size");
   
@@ -130,7 +130,7 @@ Image velocity_resize(const Image& oldvel, int w, int h)
 
 void compute_iterative_pyramid_LK(LKIterPyramid& lk)
   {
-  TIME(1); // time algo
+   // time algo
   Image S;
   Image ev;
   Image v2;
@@ -202,12 +202,12 @@ void compute_iterative_pyramid_LK(LKIterPyramid& lk)
 // returns: velocity matrix
 Image optical_flow_images(const Image& im, const Image& prev, float smooth_win, float smooth_vel)
   {
-  TIME(1);
+  
   Image S = time_structure_matrix(im, prev, smooth_win);
   Image ev = eigenvalue_matrix(S);
   Image v = velocity_image(S, ev);
   //constrain_image(v, 0.5);
-  //TIME(1);
+  
   if(smooth_vel==0)return v;
   return fast_smooth_image(v,smooth_vel);
   }
