@@ -10,8 +10,8 @@
 
 // Calculate the time-structure matrix of an Image pair.
 // const Image& im: the input Image.
-// Image prev: the previous Image in sequence.
-// float s: sigma for smoothing
+// const Image& prev: the previous Image in sequence.
+// float s: sigma used for Gaussian smoothing the gradients
 // returns: structure matrix. 1st channel is Ix^2, 2nd channel is Iy^2,
 //          3rd channel is IxIy, 4th channel is IxIt, 5th channel is IyIt.
 Image time_structure_matrix(const Image& im, const Image& prev, float s)
@@ -27,9 +27,11 @@ Image time_structure_matrix(const Image& im, const Image& prev, float s)
   return S;
   }
 
-// Compute the eigenvalues given time-structure matrix
+// Compute the eigenvalues of the structure matrix
+// Compute the EV only of S'S (the first three channels only)
 // const Image& ts: the time-structure matrix
-// returns: structure matrix. 0-th channel biggest eigenvalue, next smallest
+// returns: 2-channel image: 0-th channel : biggest eigenvalue, 
+//                           1-st channel : smallest
 Image eigenvalue_matrix(const Image& ts)
   {
   
@@ -68,9 +70,10 @@ vector<Image> make_image_pyramid(const Image& a, float factor, int levels)
 // Calculate the velocity given a structure Image
 // const Image& S: time-structure Image
 // const Image& ev: eigenvalue image
+// Return: 2 channel (u,v) image  : the x and y 
+// velocities computed by inv(S'S)*(S'T)
 Image velocity_image(const Image& S,const Image& ev)
   {
-  
   Image v(S.w, S.h, 2);
   
   // TODO: compute velocity for each pixel using (S'S)(S'T) formula 
@@ -87,7 +90,6 @@ Image velocity_image(const Image& S,const Image& ev)
 // float v: each pixel will be in range [-v, v]
 void constrain_image(const Image& im, float v)
   {
-  
   for(int i = 0; i < im.w*im.h*im.c; ++i)
     {
     if (im.data[i] < -v) im.data[i] = -v;
@@ -95,12 +97,16 @@ void constrain_image(const Image& im, float v)
     }
   }
 
-
+// const Image& im: input image
+// const Image& v: velocity image specifying how much each pixel moves
+// return warped image, with same size as input image, as discussed on 
+// the github page.
 Image warp_flow(const Image& im, const Image& v)
   {
-  
   assert(im.c==1 && v.c==2 && "Only for grayscale and vel image needs 2 channels");
   assert(im.w==v.w && im.h==v.h && "Image and velocity need to be same size");
+  
+  float old_weight=1e-4;
   
   Image result=im;
   
@@ -113,7 +119,8 @@ Image warp_flow(const Image& im, const Image& v)
 
 // Resize velocity image
 // Image oldvel: old velocity
-// w,h : new sizes
+// int w,h : new sizes
+// return new velocity image
 Image velocity_resize(const Image& oldvel, int w, int h)
   {
   Image v(w,h,2);
