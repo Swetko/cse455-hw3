@@ -28,7 +28,7 @@ Image time_structure_matrix(const Image& im, const Image& prev, float s)
   }
 
 // Compute the eigenvalues of the structure matrix
-// Compute the EV only of S'S (the first three channels only)
+// Compute the eigenvalues only of S'S (the first three channels only)
 // const Image& ts: the time-structure matrix
 // returns: 2-channel image: 0-th channel : biggest eigenvalue, 
 //                           1-st channel : smallest
@@ -137,7 +137,6 @@ Image velocity_resize(const Image& oldvel, int w, int h)
 
 void compute_iterative_pyramid_LK(LKIterPyramid& lk)
   {
-   // time algo
   Image S;
   Image ev;
   Image v2;
@@ -212,9 +211,7 @@ Image optical_flow_images(const Image& im, const Image& prev, float smooth_win, 
   
   Image S = time_structure_matrix(im, prev, smooth_win);
   Image ev = eigenvalue_matrix(S);
-  Image v = velocity_image(S, ev);
-  //constrain_image(v, 0.5);
-  
+  Image v = velocity_image(S, ev);  
   if(smooth_vel==0)return v;
   return fast_smooth_image(v,smooth_vel);
   }
