@@ -77,8 +77,11 @@ Image velocity_image(const Image& S,const Image& ev)
   Image v(S.w, S.h, 2);
   
   // TODO: compute velocity for each pixel using (S'S)(S'T) formula 
+  // Use the class Matrix2x2 and Vector2 insted of Matrix
+  // (lots of memory allocations with Matrix -> slow)
   // Use the eigenvalue image to avoid computing flow
   // if the smallest eigenvalue is smaller than 1e-5
+  // In that case just set it to (0,0)
   
   NOT_IMPLEMENTED();
   
