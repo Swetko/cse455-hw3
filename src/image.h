@@ -176,9 +176,8 @@ struct Image
   void feature_normalize(void);
   void feature_normalize_total(void);
   
-  void set_channel(int ch, const Image &im);
-  
   Image get_channel(int c) const;
+  void set_channel(int c,const Image& im);
   Image rgb_to_grayscale(void) const;
   Image transpose(void) const;
   };

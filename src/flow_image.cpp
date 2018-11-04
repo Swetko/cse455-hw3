@@ -11,7 +11,7 @@
 // Calculate the time-structure matrix of an Image pair.
 // const Image& im: the input Image.
 // Image prev: the previous Image in sequence.
-// int s: window size for smoothing.
+// float s: sigma for smoothing
 // returns: structure matrix. 1st channel is Ix^2, 2nd channel is Iy^2,
 //          3rd channel is IxIy, 4th channel is IxIt, 5th channel is IyIt.
 Image time_structure_matrix(const Image& im, const Image& prev, float s)
