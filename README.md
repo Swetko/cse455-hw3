@@ -1,10 +1,11 @@
 # CSE 455 Homework 3 #
+#### UPDATED: Sunday,  Nov4 9am: Updated this Readme and flow_image.cpp to clarify few issues ####
 
 Welcome friends,
 
 It's time for optical flow!
 
-To start out this homework, copy over your `process_image.cpp`, `filter_image.cpp`, `resize_image.cpp`, `harris_image.cpp`, and`panorama_image.cpp` files from hw2 to the `src` directory in this homework. We will be continuing to build out your image library.
+To start out this homework, copy over your `process_image.cpp`, `filter_image.cpp`, `resize_image.cpp`, `harris_image.cpp`, and`panorama_image.cpp` files from hw2 to the `src` directory in this homework. We will be continuing to build out your image library. If you want to test your previous homeworks just copy the necessary data from the previous homework folder.
 
 ## 1. Lucas-Kanade optical flow ##
 
@@ -44,11 +45,15 @@ It may look something like:
 
 For your convenience computing the sequence of pyramidal images has been implemented. You need to implement two methods. 
 
-First is `velocity_resize`. You computed the velocity image at a lower resolution. Now you move down the pyramid and need to initialize the flow with the flow from the image below. The function takes the old flow and the new sizes which are bigger and you need to return the updated flow. Think about what rescaling/resizing the flow means. Is it just image resizing?
+First is `velocity_resize`. You computed the velocity image at a lower resolution. Now you want to estimate flow at the larger resolution in the pyramid, and you need to initialize the flow at the larger resolution with the one from the smaller resolution.  The function takes the old flow and the new sizes which are bigger and you need to return the updated flow. Think about what rescaling/resizing the flow means. Is it just image resizing?
 
 After you have updated flow, you can run iterative LK. That means running one iteration of LK, obtainig a flow `v` from image `t0` to `t1`, and warping `t0` accoring to the flow `v`. That means sending each pixel from `t0(x,y)` to the location `(x+vx,y+dy)=(x+v(x,y,0),y+(v,x,y,1))`. Think what is necessary to achieve that. What do you do if a pixel does not move exactly to a new integer coordinates pixel? What do you if no pixel goes to a given new pixel `(x,y)`? You can answer and implement these questions using techniques we studied in class.
 
-For your convenience we have proividede the function `compute_iterative_pyramid_LK` that drives the algorithm.
+To peform warp, for each pixel in the warped image accumulate contributions from the warped old image pixels by keeping a `sum_weights` image and a `sum_weighted_value` image and then normalizing the values after processing all the pixels. For each pixel in the old image, compute the new location `(x1,y1)=(x+vx,y+vy)`. It is likely that it will not fall on exact integer coordinates therefore we compute the same bilinear weights as in bilinear interpolation and use those weights to update the new pixels. For each of the 4 surrounding pixels use the weight and the value to update the `sum_weights` and `sum_weighted_value` images. Overall the `sum_weights` image should contain the sum of the weights of all individual contributions and `sum_weighted_value` should contain the weighted value contributions.
+
+Some pixels might happen to have zero weight. To prevent that, initialize the `sum_weights` image and the `sum_weighted_value` image with some small value (for example 1e-4, as suggested in the code): `sum_weights=old_weight` and `sum_weighted_value=old_weight*original_value`.
+
+For your convenience we have proivided the function `compute_iterative_pyramid_LK` that drives the algorithm.
 
 Now running:
 

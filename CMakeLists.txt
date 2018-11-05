@@ -35,7 +35,7 @@ add_library(uwimg++ SHARED
 #add_executable(main src/main.c src/test.c src/test.h)
 #target_link_libraries(main uwimg m)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV)
 
 message(${OpenCV_LIBRARIES})
 message(${OpenCV_INCLUDE_DIRS})

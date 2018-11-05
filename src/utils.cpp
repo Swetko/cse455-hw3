@@ -100,6 +100,7 @@ Image Image::abs(void) const
   }
 
 
+
 Image vel2rgb(const Image& v, float thres)
   {
   TIME(1);
@@ -176,6 +177,8 @@ Image fast_smooth_image(const Image& im, float sigma)
   
   return second;
   }
+
+
 
 
 void Image::set_channel(int ch, const Image& im)
