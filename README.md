@@ -1,6 +1,7 @@
 # CSE 455 Homework 3 #
 #### UPDATED: Sunday,  Nov4 9am: Updated this Readme and flow_image.cpp to clarify few issues ####
 #### UPDATED: Monday,  Nov5 3pm: Clarified Time structure matrix (section 1.x) ####
+#### UPDATED: Monday,  Nov6 12am: Clarified Structure matrix filters (section 1.x) ####
 
 Welcome friends,
 
@@ -14,7 +15,7 @@ We'll be implementing [Lucas-Kanade](https://en.wikipedia.org/wiki/Lucas%E2%80%9
 
 ![](figs/flow-eq.png)
 
-Note the first matrix consists of 3 different elements and corresponds to `S'S` from the lecture slides and the second term is a 2-vector corresponding to `S'T`. We put the resulting 5 numbers in the so called Time-structure-matrix. **Here `It` means temporal derivative in the usual sense `It(x,y)=f(x,y,t+1)-f(x,y,t)`.** Hence the matrix `T` contains negative sign to match what we had in lecture.
+Note the first matrix consists of 3 different elements and corresponds to `S'S` from the lecture slides and the second term is a 2-vector corresponding to `S'T`. We put the resulting 5 numbers in the so called Time-structure-matrix. **Here `It` means temporal derivative in the usual sense `It(x,y)=f(x,y,t+1)-f(x,y,t)`.** Hence the matrix `T` contains negative sign to match what we had in lecture. **Also for spatial derivatis use the standard -101 filters, unlike HW2**. We are very sorry for the confusion.
 
 ## 1.1 Time-structure matrix ##
 
