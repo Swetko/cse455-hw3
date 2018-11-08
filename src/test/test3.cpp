@@ -19,6 +19,12 @@ void test_functions()
   Image colorflow = vel2rgb(vel,20);
   Image warped = warp_flow(a,vel);
   
+  S.save("output/s.raw");
+  ev.save("output/ev.raw");
+  vel.save("output/vel.raw");
+  colorflow.save("output/colorflow.raw");
+  warped.save("output/warped.raw");
+  
   Image S1(a.w,a.h,3);
   S1.set_channel(0,S.get_channel(0));
   S1.set_channel(1,S.get_channel(1));
@@ -35,23 +41,31 @@ void test_functions()
   S2.feature_normalize_total();
   
   
+  
   save_png(S1,"output/StS");
   save_png(S2,"output/StT");
   save_png(ev3,"output/ev");
   save_png(colorflow,"output/colorflow");
   save_png(warped,"output/warped");
   
-  Image StS=load_image("data/StS.png");
-  Image StT=load_image("data/StT.png");
-  Image EV3=load_image("data/ev.png");
-  Image CF=load_image("data/colorflow.png");
-  Image WARP=load_image("data/warped.png");
+  Image Sraw   =Image::load("data/s.raw");
+  Image EVraw  =Image::load("data/ev.raw");
+  Image VELraw =Image::load("data/vel.raw");
+  Image CFraw  =Image::load("data/colorflow.raw");
+  Image WARPraw=Image::load("data/warped.raw");
   
-  TEST(same_image(S1,StS));
-  TEST(same_image(S2,StT));
-  TEST(same_image(ev3,EV3));
-  TEST(same_image(colorflow,CF));
-  TEST(same_image(warped,WARP));
+  S.save("output/s.raw");
+  ev.save("output/ev.raw");
+  vel.save("output/vel.raw");
+  colorflow.save("output/colorflow.raw");
+  warped.save("output/warped.raw");
+
+  
+  TEST(same_image(S,Sraw));
+  TEST(same_image(ev,EVraw));
+  TEST(same_image(vel,VELraw));
+  TEST(same_image(colorflow,CFraw));
+  TEST(same_image(warped,WARPraw));
   printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
   
   

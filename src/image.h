@@ -180,6 +180,30 @@ struct Image
   void set_channel(int c,const Image& im);
   Image rgb_to_grayscale(void) const;
   Image transpose(void) const;
+  
+  void save(const string& file)
+    {
+    FILE*fn=fopen(file.c_str(),"wb");
+    fwrite(&w,sizeof(w),1,fn);
+    fwrite(&h,sizeof(h),1,fn);
+    fwrite(&c,sizeof(c),1,fn);
+    fwrite(data,sizeof(float),size(),fn);
+    fclose(fn);
+    }
+  
+  static Image load(const string& file)
+    {
+    
+    int w,h,c;
+    FILE*fn=fopen(file.c_str(),"rb");
+    fread(&w,sizeof(w),1,fn);
+    fread(&h,sizeof(h),1,fn);
+    fread(&c,sizeof(c),1,fn);
+    Image im(w,h,c);
+    fread(im.data,sizeof(float),im.size(),fn);
+    fclose(fn);
+    return im;
+    }
   };
 
 inline float get_pixel(const Image& im, int x, int y, int c)          { return im.get_pixel(x,y,c); }
